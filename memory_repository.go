@@ -39,3 +39,23 @@ func (r *MemoryRepository) GetProductById(ctx context.Context, id uuid.UUID) (*d
 	}
 	return r.products[id], nil
 }
+
+func (r *MemoryRepository) GetAllProducts(ctx context.Context) ([]*domain.Product, error) {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
+	products := make([]*domain.Product, 0, len(r.products))
+	for _, product := range r.products {
+		products = append(products, product)
+	}
+	return products, nil
+}
+
+func (r *MemoryRepository) UpdateProduct(ctx context.Context, product *domain.Product) error {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
+	if _, exists := r.products[product.Id]; !exists {
+		return domain.ErrProductNotFound
+	}
+	r.products[product.Id] = product
+	return nil
+}
