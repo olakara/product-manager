@@ -129,3 +129,31 @@ func TestUpdateProductShouldReturnAnErrorIfProductDoesNotExist(t *testing.T) {
 		t.Error("Product should not be updated", err)
 	}
 }
+
+func TestDeleteProductShouldDeleteAProduct(t *testing.T) {
+	repository := NewMemoryRepository()
+	product, _ := domain.NewProduct("product", 5.5)
+	err := repository.AddProduct(context.Background(), product)
+	if err != nil {
+		t.Error("Product should be added without error", err)
+	}
+	err = repository.RemoveProduct(context.Background(), product.Id)
+	if err != nil {
+		t.Error("Product should be deleted without error", err)
+	}
+	productFromRepo, err := repository.GetProductById(context.Background(), product.Id)
+	if !errors.Is(err, domain.ErrProductNotFound) {
+		t.Error("Product should not be retrieved", err)
+	}
+	if productFromRepo != nil {
+		t.Error("Product should be nil")
+	}
+}
+
+func TestDeleteProductShouldReturnAnErrorIfProductDoesNotExist(t *testing.T) {
+	repository := NewMemoryRepository()
+	err := repository.RemoveProduct(context.Background(), uuid.New())
+	if !errors.Is(err, domain.ErrProductNotFound) {
+		t.Error("Product should not be deleted", err)
+	}
+}

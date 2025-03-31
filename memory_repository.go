@@ -59,3 +59,13 @@ func (r *MemoryRepository) UpdateProduct(ctx context.Context, product *domain.Pr
 	r.products[product.Id] = product
 	return nil
 }
+
+func (r *MemoryRepository) RemoveProduct(ctx context.Context, id uuid.UUID) error {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	if _, exists := r.products[id]; !exists {
+		return domain.ErrProductNotFound
+	}
+	delete(r.products, id)
+	return nil
+}
